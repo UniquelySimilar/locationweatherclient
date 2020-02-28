@@ -1,0 +1,25 @@
+{
+  "name": "locationweatherclient",
+  "version": "1.0.0",
+  "description": "Client app that calls locationweatherapi",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack",
+    "dev": "webpack-dev-server --open"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "css-loader": "^3.4.2",
+    "style-loader": "^1.1.3",
+    "file-loader": "^4.3.0",
+    "webpack": "^4.41.6",
+    "webpack-cli": "^3.3.11",
+    "webpack-dev-server": "^3.10.3"
+  },
+  "dependencies": {
+    "axios": "^0.19.2",
+    "ol": "^6.2.1"
+  }
+}
