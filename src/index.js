@@ -8,8 +8,10 @@ import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import Feature from 'ol/Feature';
 import Point from 'ol/geom/Point';
+import {Icon, Style} from 'ol/style';
 import axios from 'axios';
 import './style.css';
+import IconImg from './marker.png';
 
 // Retrieve location and weather data
 function retrieveDataRenderMap() {
@@ -32,10 +34,6 @@ var map = null;
 var markerLayer = null;
 
 function initMap(locationWeatherData) {
-  // var lon = locationWeatherData[0].coord.lon;
-  // var lat = locationWeatherData[0].coord.lat;
-  // console.log("lon: " + lon + ", lat: " + lat);
-  // var center = [lon, lat];
   if (map == null) {
     map = new Map({
       target: 'map',
@@ -59,12 +57,21 @@ function initMap(locationWeatherData) {
     map.removeLayer(markerLayer);
   }
 
+  var iconStyle = new Style({
+    image: new Icon({
+      src: IconImg,
+      scale: 0.05
+    })
+  });
+  
+
   var featuresAry = [];
   locationWeatherData.forEach(element => {
     let pointAry = [element.coord.lon, element.coord.lat];
     let feature = new Feature({
       geometry: new Point(fromLonLat(pointAry))
-    })
+    });
+    feature.setStyle(iconStyle);
     featuresAry.push(feature);
   });
 
@@ -100,7 +107,7 @@ function initMap(locationWeatherData) {
   var btn = document.createElement('button');
   btn.type = 'button';
   btn.id = 'retrieve-btn';
-  btn.appendChild(document.createTextNode('Retrieve Data'));
+  btn.appendChild(document.createTextNode('Retrieve/Refresh Map Data'));
   btn.onclick = retrieveDataRenderMap;
 
   var headerEl = document.getElementById('header');
@@ -109,8 +116,3 @@ function initMap(locationWeatherData) {
   headerEl.appendChild(selectEl);
   headerEl.appendChild(btn);
 })();
-
-//const view = map.getView();
-// console.log("Map size: " + map.getSize());
-// console.log("Map center: " + view.getCenter());
-// console.log("Max zoom: " + view.getMaxZoom());
