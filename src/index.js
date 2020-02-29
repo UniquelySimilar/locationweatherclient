@@ -9,56 +9,106 @@ import VectorSource from 'ol/source/Vector';
 import Feature from 'ol/Feature';
 import Point from 'ol/geom/Point';
 import axios from 'axios';
+import './style.css';
 
 // Retrieve location and weather data
-const numLocations = 10;
-axios.get("http://localhost:8080/locationweatherapi/data", {
+function retrieveDataRenderMap() {
+  var numLocations = document.getElementById('num-select').value;
+  axios.get("http://localhost:8080/locationweatherapi/data", {
     params: {
       numLocations: numLocations
     }
   })
   .then(function (response) {
-    console.log(response.data);
+    //console.log(response.data);
     initMap(response.data);
   })
   .catch(function (error) {
     console.log(error);
   })
+}
+
+var map = null;
+var markerLayer = null;
 
 function initMap(locationWeatherData) {
-  var lon = locationWeatherData[0].coord.lon;
-  var lat = locationWeatherData[0].coord.lat;
-  console.log("lon: " + lon + ", lat: " + lat);
-  var center = [lon, lat];
-  //var center = [-105.13, 39.98];
-  var map = new Map({
-    target: 'map',
-    layers: [
-      new TileLayer({
-        source: new OSM()
-        // source: new XYZSource({
-        //   url: 'http://tile.stamen.com/terrain/{z}/{x}/{y}.jpg'
-        // })
+  // var lon = locationWeatherData[0].coord.lon;
+  // var lat = locationWeatherData[0].coord.lat;
+  // console.log("lon: " + lon + ", lat: " + lat);
+  // var center = [lon, lat];
+  if (map == null) {
+    map = new Map({
+      target: 'map',
+      layers: [
+        new TileLayer({
+          source: new OSM()
+          // source: new XYZSource({
+          //   url: 'http://tile.stamen.com/terrain/{z}/{x}/{y}.jpg'
+          // })
+        })
+      ],
+      view: new View({
+        center: fromLonLat([0, 0]),
+        zoom: 0 // max: 28
       })
-    ],
-    view: new View({
-      center: fromLonLat(center),
-      zoom: 0 // max: 28
-    })
-  });
-  
-  // Add a marker to map
-  var layer = new VectorLayer({
-    source: new VectorSource({
-        features: [
-            new Feature({
-                geometry: new Point(fromLonLat(center))
-            })
-        ]
-    })
-  });
-  map.addLayer(layer);
+    });
   }
+  
+  // Add a markers to map
+  if (markerLayer != null) {
+    map.removeLayer(markerLayer);
+  }
+
+  var featuresAry = [];
+  locationWeatherData.forEach(element => {
+    let pointAry = [element.coord.lon, element.coord.lat];
+    let feature = new Feature({
+      geometry: new Point(fromLonLat(pointAry))
+    })
+    featuresAry.push(feature);
+  });
+
+  markerLayer = new VectorLayer({
+    source: new VectorSource({
+      features: featuresAry
+    })
+  });
+  map.addLayer(markerLayer);
+}
+
+(function initHeader() {
+  var h3El = document.createElement('h3');
+  h3El.appendChild(document.createTextNode('Location Weather'));
+
+  var labelEl = document.createElement('label');
+  labelEl.appendChild(document.createTextNode('Select number of locations: '));
+
+  var selectEl = document.createElement('select');
+  selectEl.id = 'num-select';
+  selectEl.name = 'numLocations';
+  
+  var fragment = document.createDocumentFragment();
+  var optionEl;
+  for (var i = 1; i < 21; i++) {
+    optionEl = fragment.appendChild(document.createElement('option'));
+    optionEl.value = i;
+    optionEl.text = i;
+  }
+  selectEl.appendChild(fragment);
+  selectEl.value = 10;
+
+  var btn = document.createElement('button');
+  btn.type = 'button';
+  btn.id = 'retrieve-btn';
+  btn.appendChild(document.createTextNode('Retrieve Data'));
+  btn.onclick = retrieveDataRenderMap;
+
+  var headerEl = document.getElementById('header');
+  headerEl.appendChild(h3El);
+  headerEl.appendChild(labelEl);
+  headerEl.appendChild(selectEl);
+  headerEl.appendChild(btn);
+})();
 
 //const view = map.getView();
 // console.log("Map size: " + map.getSize());
