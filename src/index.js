@@ -2,7 +2,6 @@ import 'ol/ol.css';
 import {Map, View} from 'ol';
 import TileLayer from 'ol/layer/Tile';
 import OSM from 'ol/source/OSM';
-//import XYZSource from 'ol/source/XYZ';
 import {fromLonLat} from 'ol/proj';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
@@ -64,12 +63,17 @@ function initMap(locationWeatherData) {
     })
   });
   
-
   var featuresAry = [];
   locationWeatherData.forEach(element => {
     let pointAry = [element.coord.lon, element.coord.lat];
     let feature = new Feature({
-      geometry: new Point(fromLonLat(pointAry))
+      geometry: new Point(fromLonLat(pointAry)),
+      lon: element.coord.lon,
+      lat: element.coord.lat,
+      weatherDescription: element.weather[0] !== undefined ? element.weather[0].description : '',
+      temp: element.main.temp,
+      humidity: element.main.humidity,
+      windSpeed: element.wind.speed
     });
     feature.setStyle(iconStyle);
     featuresAry.push(feature);
@@ -81,6 +85,35 @@ function initMap(locationWeatherData) {
     })
   });
   map.addLayer(markerLayer);
+
+  // display alert on click
+  map.on('click', function(evt) {
+    var feature = map.forEachFeatureAtPixel(evt.pixel,
+      function(feature) {
+        return feature;
+      });
+    if (feature) {
+      let featureProps = feature.getProperties();
+      let message = "LONGITUDE: " + featureProps.lon + "\nLATITUDE: " + featureProps.lat;
+      if (featureProps.weatherDescription !== undefined) {
+        message += "\nDESCRIPTION: " + featureProps.weatherDescription;
+      }
+      message += "\nTEMPERATURE: " + featureProps.temp + " F" + "\nHUMIDITY: " + featureProps.humidity + "%" +
+                  "\nWIND SPEED: " + featureProps.windSpeed;
+      alert(message);
+    }
+  });
+
+  // change mouse cursor when over marker
+  // map.on('pointermove', function(e) {
+  //   if (e.dragging) {
+  //     $(element).popover('destroy');
+  //     return;
+  //   }
+  //   var pixel = map.getEventPixel(e.originalEvent);
+  //   var hit = map.hasFeatureAtPixel(pixel);
+  //   map.getTarget().style.cursor = hit ? 'pointer' : '';
+  // });
 }
 
 (function initHeader() {
@@ -108,7 +141,7 @@ function initMap(locationWeatherData) {
   btn.type = 'button';
   btn.id = 'retrieve-btn';
   btn.appendChild(document.createTextNode('Retrieve/Refresh Map Data'));
-  btn.onclick = retrieveDataRenderMap;
+  btn.addEventListener('click', retrieveDataRenderMap);
 
   var headerEl = document.getElementById('header');
   headerEl.appendChild(h3El);
