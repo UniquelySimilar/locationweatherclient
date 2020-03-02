@@ -39,9 +39,6 @@ function initMap(locationWeatherData) {
       layers: [
         new TileLayer({
           source: new OSM()
-          // source: new XYZSource({
-          //   url: 'http://tile.stamen.com/terrain/{z}/{x}/{y}.jpg'
-          // })
         })
       ],
       view: new View({
@@ -103,17 +100,6 @@ function initMap(locationWeatherData) {
       alert(message);
     }
   });
-
-  // change mouse cursor when over marker
-  // map.on('pointermove', function(e) {
-  //   if (e.dragging) {
-  //     $(element).popover('destroy');
-  //     return;
-  //   }
-  //   var pixel = map.getEventPixel(e.originalEvent);
-  //   var hit = map.hasFeatureAtPixel(pixel);
-  //   map.getTarget().style.cursor = hit ? 'pointer' : '';
-  // });
 }
 
 (function initHeader() {
